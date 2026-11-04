@@ -1,0 +1,23 @@
+# templates/deprecation-entry.yaml
+# 复制到台账的 `deprecations:` 列表里；编号按域当前最大号 + 1，连续不留缺号。
+
+deprecations:
+  - ext_id: DEP-CAL-003
+    claim: "标定常数 k = 1.21，误差 ±3%"
+    status: 作废                  # 作废 | 更正 | 部分平反
+    date: 2026-03-04
+    verdict: >-
+      汇总表用的是全量数据，但 k 是在去掉首点后拟合的；复算全量给 1.08，
+      差 11%。另外 ±3% 是条件误差，不是完整协方差。
+    correction: >-
+      全量重拟合 k = 1.08 ± 0.06（95%）；旧 1.21 只能用于“去掉首点”口径。
+    caveats: >-
+      幂律函数形式本身没被推翻，被作废的是参数值和“±3%”这个精度声明；
+      趋势与量级仍成立。
+    residue:
+      - results/old/RESULTS.md
+      - handoff/CONTEXT_PACK.md §2
+    scope: "仅老款夹具 + 银电极；新款未测"
+    topics: [作废, 标定, 拟合]
+    batches: []
+    source: "results/2026-03-04/review/FALSIFIED.md §C1"

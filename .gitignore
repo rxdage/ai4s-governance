@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+dist/
+build/
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Local lab data — never commit real instrument output
+/lab/
+/workspaces/
+/inbox/
+/library/
+/examples/demo/
+/examples/messy-lab/
+
+# Generated reports
+_selfcheck_report.txt
+_credential.txt
+_delivery_list.csv
+_pending.csv
+patrol_last.json
+tickets.jsonl
+receipts.json
+waivers.yaml

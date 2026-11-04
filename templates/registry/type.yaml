@@ -1,0 +1,16 @@
+# templates/registry/type.yaml
+# 复制一个条目到 registry/types.yaml，改字段，再签字。
+# 不要复制整段注释到正式文件里也可以——注释不影响解析，但会让 diff 变大。
+
+types:
+  MEAS:
+    name_cn: 测量数据                     # 给人看的中文名
+    description: >-                        # 这个码到底指什么文件；验收时靠它判断
+      仪器直接产出的一次采集。一次采集一个文件；同一分钟多个文件用 RUN+1。
+    derived: false                         # 必填布尔值：true=算出来的，false=测出来的
+    proposer: Li Ming                      # 提案人实名（不是称谓）
+    proposed_at: 2026-03-04                # YYYY-MM-DD
+    status: PROPOSED                       # PROPOSED / DEPRECATED / REJECTED
+    # 可选：出处、同义词、相关码
+    source: 2026-03 湿实验数据盘点
+    note: ""

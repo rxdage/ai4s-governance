@@ -1,0 +1,123 @@
+# 示例：AI4S 作废/更正台账
+# 全为合成数据，用于演示字段与校验；真实台账请按域重新编号。
+#
+# 规则：
+#   - status=部分平反 必须写 scope
+#   - caveats 必须回答“那什么还站得住”
+#   - residue 是防复活巡查点
+#   - ext_id 按域递增，连续不留缺号
+
+deprecations:
+
+  - ext_id: DEP-CAL-001
+    claim: "标定常数 k = 1.21，误差 ±3%"
+    status: 作废
+    date: 2026-03-04
+    verdict: >-
+      汇总表用的是全量数据，但 k 是在去掉首点后拟合的；复算全量给 1.08，
+      差 11%。另外 ±3% 是条件误差，不是完整协方差。
+    correction: >-
+      全量重拟合 k = 1.08 ± 0.06（95%）；旧 1.21 只能用于“去掉首点”口径。
+    caveats: >-
+      幂律函数形式仍成立；被作废的是参数值和“±3%”这个精度声明，趋势与量级不变。
+    residue:
+      - results/old/RESULTS.md
+      - handoff/CONTEXT_PACK.md §2
+    topics: [作废, 标定, 拟合]
+    batches: [R0007]
+    source: "results/2026-03-04/review/FALSIFIED.md §C1"
+
+  - ext_id: DEP-CAL-002
+    claim: "空白对照均值 0.020，批间波动 <2%"
+    status: 更正
+    date: 2026-03-06
+    verdict: >-
+      0.020 是四舍五入后的显示值；原始值 0.0184。批间波动按完整协方差算是 4.7%，
+      不是 2%——2% 只是同一批内三次重复的极差。
+    correction: >-
+      空白对照均值 0.0184 ± 0.0009；批间波动 4.7%（95%）。作判据时用 0.0184。
+    caveats: >-
+      空白水平仍显著低于信号（约 20 倍），“空白可忽略”这一定性结论成立。
+    residue:
+      - results/old/blank_summary.csv
+    topics: [更正, 对照, 统计]
+    batches: [R0007, R0008]
+    source: "results/2026-03-06/review/FALSIFIED.md §C2"
+
+  - ext_id: DEP-IMG-001
+    claim: "图像边缘场增强 6.1×，峰位在距边缘 16.6 µm 处"
+    status: 作废
+    date: 2026-03-08
+    verdict: >-
+      两件事都错了：① 模型把支撑区当成绝缘，实际是液-液短路，支撑区吃掉 99.99% 的电流；
+      ② 分母是网格伪迹，随网格加密从 768 降到 37，原值高估 20 倍。
+    correction: >-
+      修复几何后膜内增强因子 β = 1.000，全窗口均匀；“击穿优先发生在边缘”这一定性
+      结论一并撤回。
+    caveats: >-
+      泊松统计部分（缺陷密度、良率）不受影响，仍成立；本类模型不支持 6.1× 这个数，
+      不等于真实器件没有边缘增强。
+    residue:
+      - results/old/b5_field_vs_r.csv
+      - handoff/ASSETS.md §7.1
+    scope: "仅该几何 + 该网格档；修复版仍把薄膜当薄层边界条件"
+    topics: [作废, 图像, 场分布, 边缘]
+    batches: []
+    source: "results/2026-03-08/review/FALSIFIED.md §C3"
+
+  - ext_id: DEP-CAP-001
+    claim: "0.01 Hz 不可用，读孔电导必须用 0.1 Hz"
+    status: 部分平反
+    date: 2026-03-12
+    scope: >-
+      平反只对老款夹具 + 银电极成立。新款镀银铜针未测，对它的原作废裁定仍然有效。
+    verdict: >-
+      原作废理由是没有建电极阻抗，计算出的天花板 227 是阻塞电极的产物；
+      实测电极电荷转移电阻有限且极小，转折频率在判据带内 2.4 倍以上，
+      电极近似纯电阻，天花板不存在。
+    correction: >-
+      老款 + 银电极：0.01 Hz 的判据量约 680（原报值成立），可作为“条件可用的确认档”；
+      生产默认仍是 0.1 Hz（68.0，余量 6.8 倍）。
+    caveats: >-
+      对老款，“0.01 Hz 不可用”不再成立；对新款，原来的包络仍全开。1 Hz = 6.80 不变。
+    residue:
+      - docs/spec.md:755
+      - handoff/CONTEXT_PACK.md §3c
+    topics: [部分平反, 频率, 电极, 判据]
+    batches: []
+    source: "results/2026-03-12/review/REVIEW.md §3"
+
+  - ext_id: DEP-SIG-001
+    claim: "检测限按 3σ 计算，为 0.12 nM"
+    status: 更正
+    date: 2026-03-15
+    verdict: >-
+      3σ 只描述空白噪声，没有包含校准斜率的置信区间；按完整误差传播应为 5σ 等效，
+      且 n=3 的自由度不足以支持 95% 声明。
+    correction: >-
+      检测限 0.19 nM（95%，含斜率不确定度）；原 0.12 只在“斜率视为真值”时成立。
+    caveats: >-
+      “检测限在亚 nM 量级”这一定性结论仍成立；被更正的是具体数值与置信口径。
+    residue:
+      - results/old/limits.csv
+    topics: [更正, 检测限, 统计]
+    batches: [R0008]
+    source: "results/2026-03-15/review/FALSIFIED.md §C4"
+
+  - ext_id: DEP-CAL-003
+    claim: "温度是批间差异的主因"
+    status: 作废
+    date: 2026-03-18
+    verdict: >-
+      温度与批次完全共线（每批只在一个温度下测过），设计上无法把两者分开；
+      原分析把“与批次同向变化”当成了“温度导致”。
+    correction: >-
+      只能说“批间差异与温度同向”，不能归因；需要交叉设计（同一批分两个温度）才能判定。
+    caveats: >-
+      温度会影响信号这一定性方向仍成立；被作废的是“主因”这一归因声明。
+    residue:
+      - results/old/attribution.md
+      - handoff/GPT_GUIDE.md
+    topics: [作废, 归因, 混杂]
+    batches: [R0007, R0008]
+    source: "results/2026-03-18/review/FALSIFIED.md §C5"

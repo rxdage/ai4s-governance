@@ -1,0 +1,67 @@
+# AI4S Governance
+
+> Agent-native governance for AI4S (AI for Science) R&D teams: four-zone filenames, hash-bound registries, a single-source library, and a falsification ledger. Agents do the running; the program decides PASS; people sign, spot-check and release.
+
+AI4S Governance is a small, forkable research data management kit for labs where
+AI agents do most of the file work. It is not a data catalog, a RAG memory, a
+LIMS, or a turnkey SaaS. It is the contract and trust layer underneath them.
+
+It fits when agents cannot parse or find files without opening them, when nobody
+can prove who approved a code or which version they approved, when measured and
+computed results look the same on disk, or when a falsified claim keeps coming
+back. It does not fit when the need is a data catalog, lineage, PII compliance,
+retrieval, or lab workflow.
+
+## Core documents
+
+- [Overview](docs/00-overview.md): the four failures, five principles, four layers, and what this is not.
+- [Naming](docs/01-naming.md): the four-zone filename convention (`identity__type__condition__time`), character set, 200-byte limit, examples and anti-examples.
+- [Registry](docs/02-registry.md): types, classes, codes, and hash-bound signatures; why approval is an event, not a field.
+- [Intake](docs/03-intake.md): copy-only ingest, `manifest.tsv`, sha256 verification, `data/` vs `derived/`, provenance sidecars with four gates, and the change-after-ingest rules.
+- [Roles and AI](docs/04-roles-and-ai.md): owner, steward, reviewer, agent; twelve red lines; what an agent may not do.
+- [Cadence](docs/05-cadence.md): four-folder workspace, daily intake, patrol, receipt cards, and the Friday review that must look at last week.
+- [Knowledge and models](docs/06-knowledge.md): KB cards, model cards, L0–L3 confidence, and A–D–X citation grades.
+- [Falsification](docs/07-falsification.md): adversarial review of load-bearing claims, and the deprecation ledger (`claim / verdict / correction / caveats / residue / scope`).
+- [Adoption](docs/08-adoption.md): a 30/60/90-day rollout.
+- [Case study](docs/09-case-study.md): desensitized numbers and failures.
+- [Decisions](docs/10-decisions.md): why this design, and the alternatives that were rejected.
+- [FAQ](docs/11-faq.md): objections and practical answers.
+- [Publishing](docs/12-publishing.md): a desensitization checklist.
+- [Evolution](docs/13-evolution.md): fifteen architecture repairs, with triggers, costs and unresolved parts.
+- [Adoption](docs/14-adoption.md): how five people started using it, and what we failed to measure.
+- [Agent operations](docs/15-agent-ops.md): task routing, convergence loops, and the real cost of a change.
+- [Writing](docs/16-writing.md): the humanizer checklist for every human-facing text.
+- [Field notes](docs/field-notes/README.md): three publishable essays on the repair log, adoption speed, and model routing.
+- [Cheatsheet](docs/cheatsheet.md): one printable page.
+
+## Machine-readable contract
+
+- [filename-schema.yaml](spec/filename-schema.yaml): the single source of truth for the four-zone grammar, semantics, error codes, and ingest contract.
+- [Registry templates](templates/registry/type.yaml): type, class, and code entries.
+- [Derived sidecar](templates/derived-sidecar.yaml): provenance fields.
+- [Deprecation entry](templates/deprecation-entry.yaml): ledger fields.
+
+## Tools
+
+- `ai4s audit` — read-only lab data health check; parseable %, top issues, fix-first report. `--names` audits a relative-path list without touching files.
+- `ai4s adoption` — M1–M5 adoption report from self-check logs, receipts and proposals.
+- `ai4s naming check|selftest` — parse and validate filenames.
+- `ai4s registry verify|sign|revoke|status` — validate entries and manage hash-bound signatures.
+- `ai4s check` — pre-delivery gate; produces `_credential.txt`, `_delivery_list.csv`, `_pending.csv`.
+- `ai4s ingest copy|verify|void` — copy-only ingest, manifest, sha256 verification, void ledger.
+- `ai4s rename` — five gates, all-or-nothing, original-name log.
+- `ai4s patrol` — read-only "who is blocked on what".
+- `ai4s bot` — receipt / release / reject / waiver / explain; adapter-agnostic core plus a Feishu reference adapter.
+- `ai4s ledger check|query|report` — validate and query the deprecation ledger.
+
+## Evidence
+
+- Vocabulary scan before designing the schema: 1,751,067 files, 1,159,750 data-class, 17,909 raw instrument acquisitions.
+- Registry: 39 type codes (7 derived).
+- Library at one point: 1,592 data files and 135 sidecars.
+- Falsification ledger: 117 voided or corrected claims; one adversarial review turned 12 drafts into 11 refutations.
+- One "AI-organized" delivery still had 145 filename syntax errors, 192 unregistered codes, and one unparseable YAML.
+
+## License
+
+Code: MIT. Documentation: CC BY 4.0.

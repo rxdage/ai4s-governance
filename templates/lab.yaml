@@ -1,0 +1,36 @@
+# templates/lab.yaml
+# 你的实验室配置。路径相对本文件所在目录。
+# 复制到仓库根目录并改名 lab.yaml。
+
+lab:
+  name: my-lab
+  timezone: Asia/Shanghai
+
+paths:
+  library: library
+  registry: registry
+  workspaces: workspaces
+
+people:
+  - id: owner-a
+    name: Owner A
+    role: owner
+    workspace: workspaces/owner-a
+  - id: owner-b
+    name: Owner B
+    role: owner
+    workspace: workspaces/owner-b
+  - id: steward
+    name: Steward
+    role: steward
+    workspace: workspaces/steward
+
+policy:
+  credential_max_age_days: 7
+
+bot:
+  adapter: feishu          # console | feishu
+  dry_run: true            # 先 dry-run，确认消息形态再开
+  state_dir: state
+  steward: steward
+  chat_id: ""              # 群 ID；dry-run 时可以留空

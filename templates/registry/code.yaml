@@ -1,0 +1,15 @@
+# templates/registry/code.yaml
+# code 进文件名第 3 区。instance 必须完整到“同 code 即同参数集”。
+
+codes:
+  BUF1:
+    class: BUF
+    instance: >-
+      10 mM Tris-HCl, pH 8.0, 1 M KCl；0.22 µm 过滤；配制后 4 °C 保存 ≤7 天。
+      完整配方与批次见 R0000_ALL_ALL__PARAM__BUF1__T202603041000_RUN0000.yaml
+    proposer: Li Ming
+    proposed_at: 2026-03-04
+    status: PROPOSED
+    # 可选
+    source: 2026-03 缓冲液盘点
+    notes: 与 BUF2 只差 pH；不要合并——pH 会改变结果。

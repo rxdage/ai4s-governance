@@ -1,0 +1,25 @@
+# templates/derived-sidecar.yaml
+# 放在数据文件同目录，文件名 = 数据完整文件名 + ".meta.yaml"
+# 例：R0007_W0012_ALL__FIT__NA__T202603051530_RUN0000.csv.meta.yaml
+
+derived_from:                       # 必填：用了哪些文件，写完整文件名
+  - R0007_W0012_D0003__MEAS__BUF1_DAQ1__T202603041030_RUN0000.csv
+  - R0007_W0012_D0004__MEAS__BUF1_DAQ1__T202603041045_RUN0000.csv
+
+input_sha256:                       # 必填：从库的 manifest.tsv 抄，不要自己另算
+  - 3f2a9c0d1e2f3a4b5c6d7e8f90123456789abcdef0123456789abcdef012345
+  - 8b41d0c1b2a3948576675849302019283746554433221100ffeeddccbbaa9988
+
+method: script                      # 必填：script | manual | ai_assisted
+tool: "fit_pore.py @ commit a1b2c3d"   # 必填：脚本名 + 版本/commit；manual 写 manual
+
+params:                             # 可选：影响结果的关键参数
+  model: linear
+  r2_min: 0.98
+  exclude_first_point: false
+
+reviewed_by: Li Ming                # 必填：实名；称谓（本人/领导/AI）会被拒
+reviewed_at: "2026-03-05"           # 必填：YYYY-MM-DD
+
+notes: >-                           # 可选：口径、已知偏差、适用范围
+  只用 RUN0000/RUN0001 两条；RUN0002 因基线漂移被排除。

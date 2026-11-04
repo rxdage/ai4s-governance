@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/ai4s-governance/deprecation.schema.json",
+  "title": "Deprecation ledger",
+  "description": "Machine-readable memory of claims that did not survive adversarial review.",
+  "type": "object",
+  "required": ["deprecations"],
+  "properties": {
+    "deprecations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["ext_id", "claim", "status", "date", "verdict", "correction", "caveats", "source"],
+        "properties": {
+          "ext_id": { "type": "string", "pattern": "^DEP-[A-Z]{2,8}-[0-9]{1,4}$" },
+          "claim": { "type": "string", "minLength": 1 },
+          "status": { "enum": ["作废", "更正", "部分平反", "void", "corrected", "partially-rehabilitated"] },
+          "date": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+          "verdict": { "type": "string", "minLength": 1 },
+          "correction": { "type": "string", "minLength": 1 },
+          "caveats": { "type": "string", "minLength": 1 },
+          "scope": { "type": "string" },
+          "residue": { "type": "array", "items": { "type": "string" } },
+          "topics": { "type": "array", "items": { "type": "string" } },
+          "batches": { "type": "array", "items": { "type": "string" } },
+          "source": { "type": "string", "minLength": 1 }
+        },
+        "if": {
+          "properties": { "status": { "enum": ["部分平反", "partially-rehabilitated"] } },
+          "required": ["status"]
+        },
+        "then": { "required": ["scope"] },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,95 @@
+# templates/routing-policy.yaml
+# 任务路由策略：把对的活给对的模型。
+# 不要写供应商名字；写“档位”，换模型时只改映射。
+# 档位示例：cheap-fast | mid | frontier | not-routed
+
+version: 1
+updated_at: 2026-03-04
+
+tiers:
+  cheap-fast:
+    description: 机械、可验证、可回滚的改动
+    budget: "low"
+  mid:
+    description: 有测试可判的代码/配置改动
+    budget: "medium"
+  frontier:
+    description: 判断、设计、语义裁决
+    budget: "high"
+  not-routed:
+    description: 不可逆或必须人做的动作
+    budget: "none"
+
+routes:
+  - task: mechanical_edit
+    examples:
+      - "批量改名"
+      - "格式统一"
+      - "文档字段同步"
+    tier: cheap-fast
+    acceptance:
+      - "dry-run 输出与预期一致"
+      - "diff 只包含目标字段"
+    guardrails:
+      - "先 dry-run"
+      - "人看 diff 后再 apply"
+
+  - task: code_change
+    examples:
+      - "脚本"
+      - "CI"
+      - "schema"
+    tier: mid
+    acceptance:
+      - "测试全过"
+      - "lint/类型检查通过"
+    guardrails:
+      - "测试必须真的跑"
+      - "不接受“应该能过”"
+
+  - task: design_decision
+    examples:
+      - "架构取舍"
+      - "语义冲突"
+      - "流程设计"
+    tier: frontier
+    acceptance:
+      - "写出选项与代价"
+      - "写出什么条件下重新考虑"
+    guardrails:
+      - "人做最终决定"
+
+  - task: adversarial_review
+    examples:
+      - "证伪"
+      - "找漏洞"
+      - "挑隐含假设"
+    tier: frontier
+    acceptance:
+      - "判决七字段齐全"
+      - "what_i_computed 是数值"
+    guardrails:
+      - "必须与作者不同模型/视角"
+      - "不告诉它预期答案"
+
+  - task: routine_check
+    examples:
+      - "巡检"
+      - "对账"
+      - "生成报告"
+    tier: cheap-fast
+    acceptance:
+      - "输出可被程序校验"
+    guardrails:
+      - "程序判定，不靠模型"
+
+  - task: irreversible
+    examples:
+      - "签字"
+      - "发布"
+      - "删除"
+      - "对外发消息"
+    tier: not-routed
+    acceptance: []
+    guardrails:
+      - "只有人能做"

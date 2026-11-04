@@ -1,0 +1,211 @@
+# =============================================================================
+# AI4S Governance · 文件命名机器契约 / Filename machine contract
+# -----------------------------------------------------------------------------
+# 这份 YAML 是**唯一机器真值**。`docs/01-naming.md` 是人类可读的解释；
+# 两者冲突时以本文件为准，并把文档改到一致。
+#
+# 设计原则（与 docs/00-overview.md 的五条原则一一对应）：
+#   1. 机器不打开文件就能识别：四区全在名字里，扩展名之外全部大写。
+#   2. 人一眼看懂：身份 / 类型 / 条件 / 时序，各占一区。
+#   3. 先注册后使用：第 2、3 区只允许注册且已签字的码。
+#   4. 身份与条件分离：码只表达 class，参数细节留在注册表。
+#   5. 只增不改：库内文件名冻结，变更 = 换 RUN 重入 + 台账留痕。
+#
+# 改编自一套在真实实验室运行的四区制规范（2026-07 起）。公开版做了三处
+# 硬化，理由见 docs/10-decisions.md：
+#   - 签字不再写进条目，改为 `signatures.yaml` 里**绑定内容哈希**的签名；
+#   - 批次编号起点可配置，不再硬编码历史批次；
+#   - 加密/密级只保留接口位，默认关闭，避免把组织流程强加给 fork。
+# =============================================================================
+
+filename_schema: "1.0.0"
+schema_name: ai4s-filename
+status: baseline              # draft | baseline
+authored_at: "2026-03-01"
+revised_at: "2026-03-01"
+
+# ---------------------------------------------------------------------------
+# 1. 字符集与总体形状 / charset and shape
+# ---------------------------------------------------------------------------
+charset: "A-Za-z0-9_."        # 扩展名允许小写；正文只允许大写
+zone_separator: "__"          # 区之间双下划线
+intra_zone_separator: "_"     # 区内单下划线
+zone_count: 4
+max_name_bytes: 200           # 完整文件名（含扩展名）≤ 200 字节
+uppercase_body: true          # 第 1–4 区必须全大写
+
+# ---------------------------------------------------------------------------
+# 2. 四个区 / the four zones
+# ---------------------------------------------------------------------------
+zones:
+
+  # 第 1 区 · 身份：R=批次/轮次, W=样品/片, D=个体/芯片/重复单元
+  # 机器只认形状；R/W/D 的语义由使用方在 docs/01-naming.md 里映射。
+  zone1:
+    pattern: 'R(?P<batch>[0-9]{4})_(?P<sample>W[0-9]{4}|ALL)_(?P<unit>D[0-9]{4}|ALL)'
+    example: "R0007_W0012_D0003"
+    all_token: "ALL"
+
+  # 第 2 区 · 类型：一个词说明"这是什么文件"，2–15 个纯大写字母，不含数字
+  zone2:
+    pattern: '(?P<type_code>[A-Z]{2,15})'
+    example: "MEAS"
+
+  # 第 3 区 · 条件：class+编号，多个 code 用单下划线连接；无条件写 NA
+  zone3:
+    pattern: 'NA|(?:[A-Z]{2,12}(?:0|[1-9][0-9]{0,3}))(?:_[A-Z]{2,12}(?:0|[1-9][0-9]{0,3}))*'
+    example: "BUF1_DAQ1"
+    none_token: "NA"
+    class_pattern: '^(?P<cls>[A-Z]{2,12})(?P<idx>0|[1-9][0-9]{0,3})$'
+    max_codes: 8
+
+  # 第 4 区 · 时序：T=人工核对过的采集/编制时刻，RUN=同一组下第几次执行
+  zone4:
+    pattern: 'T(?P<timestamp>[0-9]{12})_RUN(?P<run>[0-9]{4})'
+    example: "T202603041430_RUN0000"
+
+  extension:
+    pattern: '(?P<ext>\.[A-Za-z0-9]+(?:\.[A-Za-z0-9]+)*)'
+    required: true
+
+# ---------------------------------------------------------------------------
+# 3. 语义规则 / semantic rules (regex 过了还要过这些)
+# ---------------------------------------------------------------------------
+semantics:
+  time_format: "%Y%m%d%H%M"
+  time_min_year: 2000
+  time_max_year: 2099
+  # W=ALL 时 D 必须也是 ALL；禁止 R0007_ALL_D0003 这类混写
+  all_requires_all: true
+  # 库级文件（不挂任何批次）固定 R0000_ALL_ALL
+  library:
+    batch: 0
+    sample: "ALL"
+    unit: "ALL"
+  # 编号起点：batch >= zero_allowed_from 时允许 0000。
+  # 历史批次若从 0001 起编，把这里调大即可；公开版默认从 0000 起。
+  numbering:
+    zero_allowed_from: 1
+    legacy_min: 1
+  # 类型码/条件码保留字，任何情况下不得注册
+  reserved_words: ["NA", "NAN", "ALL", "RUN", "CH", "UNMAPPED"]
+  # 第 3 区多个 code 之间按整个 code 的 ASCII 字节序排序。
+  # 乱序只提示、不代改：改名是人的决定，工具只给证据。
+  condition_order: ascii_warn_only
+
+# ---------------------------------------------------------------------------
+# 4. 注册表与签字 / registry and signatures
+# ---------------------------------------------------------------------------
+registry:
+  dir: "registry"
+  files:
+    types: "types.yaml"
+    classes: "classes.yaml"
+    codes: "codes.yaml"
+    classification: "classification.yaml"
+    signatures: "signatures.yaml"      # append-only，绑定条目内容哈希
+  # 条目本身只写生命周期意图（PROPOSED / DEPRECATED / REJECTED）。
+  # “已批准”不是条目上的一个标签，而是 signatures.yaml 里一条与内容哈希绑定的签名。
+  # 这样“改一个字就自动失效”，不需要人工记得去 unsign。
+  statuses: ["PROPOSED", "DEPRECATED", "REJECTED"]
+  # 这些称谓不是实名。与 selfcheck 的 reviewed_by 共用同一份黑名单。
+  forbidden_approvers: ["合伙人", "负责人", "老板", "领导", "本人", "AI", "admin", "team"]
+  # 签名对象 = 条目规范化 JSON 的 sha256；内容改一个字，签名自动失效。
+  signature:
+    algo: "sha256"
+    canonical: "json-sorted-utf8"
+    covers: ["types", "classes", "codes"]
+  classification_levels: ["internal", "restricted", "secret"]
+  classification_default: "internal"
+
+# ---------------------------------------------------------------------------
+# 5. 衍生数据 sidecar / derived-data provenance
+# ---------------------------------------------------------------------------
+derived:
+  suffix: ".meta.yaml"                 # 接在完整文件名后面，不替换原扩展名
+  required_fields:
+    - derived_from
+    - input_sha256
+    - method                             # script | manual | ai_assisted
+    - tool                               # 脚本名 + 版本/commit；manual 可写 manual
+    - reviewed_by                        # 实名，必填
+    - reviewed_at
+  optional_fields: [params, notes]
+  methods: ["script", "manual", "ai_assisted"]
+  # 入库四道闸门，缺一不收
+  gates:
+    - "SIDECAR_MISSING"
+    - "DERIVED_INPUT_EMPTY"
+    - "DERIVED_INPUT_NOT_IN_LIBRARY"
+    - "DERIVED_INPUT_CHANGED"
+    - "DERIVED_NOT_REVIEWED"
+
+# ---------------------------------------------------------------------------
+# 6. 入库契约 / ingest contract
+# ---------------------------------------------------------------------------
+ingest:
+  partitions: ["data", "derived"]      # 测出来的 / 算出来的
+  path_template: "{partition}/R{batch:04d}/{filename}"
+  manifest: "index/manifest.tsv"
+  manifest_columns:
+    - sr_rel          # 库内相对路径
+    - src_abs         # 入库那一刻的真实来源（只记不改）
+    - sha256
+    - size
+    - copied_at
+    - partition
+    - ingest_batch    # 哪一批收的：回答"交了 500 进了 480，那 20 个去哪了"
+  readonly_mode: "0444"
+  copy_not_move: true
+  overwrite: false
+  # 入库后变更：库内永不原地改。库外改好，T 不变、RUN+1，整份重入。
+  change_policy:
+    in_place_edit: false
+    rename_in_library: false
+    content_change: "same T, RUN + 1, re-ingest"
+    void: "keep file, append to void ledger, never delete"
+
+# ---------------------------------------------------------------------------
+# 7. 错误码 / error codes（工具与 CI 共用这一份词汇表）
+# ---------------------------------------------------------------------------
+error_codes:
+  NAME_TOO_LONG:         { severity: ERROR, meaning: "完整文件名超过 200 字节" }
+  CHARSET_INVALID:       { severity: ERROR, meaning: "出现空格、连字符、中文等非法字符" }
+  BODY_NOT_UPPERCASE:    { severity: ERROR, meaning: "第 1–4 区出现小写字母（只有扩展名可小写）" }
+  ZONE4_SYNTAX:          { severity: ERROR, meaning: "时序区形状不对（T 或 RUN 段）" }
+  ZONE_COUNT:            { severity: ERROR, meaning: "不是恰好四区" }
+  ZONE1_SYNTAX:          { severity: ERROR, meaning: "身份区形状不对（R/W/D 位数、前缀）" }
+  ZONE1_ALL_MIX:         { severity: ERROR, meaning: "W=ALL 但 D 不是 ALL" }
+  ZONE1_LIBRARY_MIX:     { severity: ERROR, meaning: "R0000 但 W/D 不是 ALL" }
+  ZONE1_NUMBERING:       { severity: ERROR, meaning: "该批次不允许 0000 编号" }
+  TYPE_SYNTAX:           { severity: ERROR, meaning: "类型码不是 2–15 个纯大写字母" }
+  TYPE_UNKNOWN:          { severity: ERROR, meaning: "类型码未注册" }
+  TYPE_NOT_APPROVED:     { severity: ERROR, meaning: "类型码已注册但未签字" }
+  TYPE_DEPRECATED:       { severity: ERROR, meaning: "类型码已作废，按 superseded_by 换号" }
+  CODE_SYNTAX:           { severity: ERROR, meaning: "条件码不是 class+数字" }
+  CODE_UNKNOWN:          { severity: ERROR, meaning: "条件码未注册" }
+  CODE_NOT_APPROVED:     { severity: ERROR, meaning: "条件码已注册但未签字" }
+  CODE_DEPRECATED:       { severity: ERROR, meaning: "条件码已作废" }
+  COND_DUPLICATE_CLASS:  { severity: ERROR, meaning: "同一 class 在一个名字里出现多次" }
+  COND_NA_MIXED:         { severity: ERROR, meaning: "NA 必须独占整个第三区" }
+  COND_TOO_MANY:         { severity: ERROR, meaning: "条件码数量超过上限" }
+  TIME_INVALID:          { severity: ERROR, meaning: "T 不是真实日期时间" }
+  TIME_OUT_OF_RANGE:     { severity: ERROR, meaning: "T 的年份超出允许范围" }
+  RUN_SYNTAX:            { severity: ERROR, meaning: "RUN 不是四位数字" }
+  EXT_MISSING:           { severity: ERROR, meaning: "缺少扩展名" }
+  LEGACY_P_SLOT:         { severity: ERROR, meaning: "使用了已取消的 P 槽位" }
+  NAME_DUPLICATE:        { severity: ERROR, meaning: "交付范围内完整文件名重复" }
+  SIDECAR_MISSING:       { severity: ERROR, meaning: "衍生文件缺 .meta.yaml" }
+  DERIVED_INPUT_EMPTY:   { severity: ERROR, meaning: "derived_from 为空" }
+  DERIVED_INPUT_NOT_IN_LIBRARY: { severity: ERROR, meaning: "引用的输入不在库或哈希对不上" }
+  DERIVED_NOT_REVIEWED:  { severity: ERROR, meaning: "reviewed_by 为空或是称谓" }
+  CONTENT_ID_MISMATCH:   { severity: WARN,  meaning: "文件内容里的身份号与文件名不一致（只问不改）" }
+  RUN_GAP:               { severity: WARN,  meaning: "同组 RUN 断号（丢了？漏传？有意不交？）" }
+  TIMESTAMP_CLUSTER:     { severity: WARN,  meaning: "多个文件共用同一时间戳（T 是否真实？）" }
+  COND_ORDER:            { severity: WARN,  meaning: "条件码未按 ASCII 排序" }
+  EMPTY_DIR:             { severity: WARN,  meaning: "空目录（可能只是漏传）" }
+  SIGNATURE_STALE:       { severity: ERROR, meaning: "条目内容在签字后被改动，必须重签" }
+  SIGNATURE_UNKNOWN:     { severity: ERROR, meaning: "签名指向不存在的条目" }
+  DUPLICATE_INSTANCE:    { severity: ERROR, meaning: "两个 code 的 instance 完全相同" }
+  CLASS_MISSING:         { severity: ERROR, meaning: "code 指向的 class 不存在" }
+  STATUS_INVALID:        { severity: ERROR, meaning: "status 不是允许值" }

@@ -1,0 +1,16 @@
+# templates/registry/class.yaml
+# class 只进注册表，不进文件名；它定义“条件属于哪一类”。
+
+classes:
+  BUF:
+    name_cn: 缓冲液
+    owner: Li Ming                         # 这一类条件的负责人
+    scope: >-                              # 适用边界：什么算 BUF，什么不算
+      湿实验用的缓冲液配方：盐浓度、pH、添加剂。不含样品本身（那是 SAMP）。
+    description: >-
+      同一 class 下用 BUF0/BUF1/BUF2… 区分不同配方；配方变更必须注册新号。
+    proposer: Li Ming
+    proposed_at: 2026-03-04
+    status: PROPOSED
+    # 可选：和哪些 class 经常一起出现
+    related: [SAMP, DAQ]

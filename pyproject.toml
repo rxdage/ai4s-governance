@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ai4s-governance"
+version = "0.1.0"
+description = "Agent-native governance for AI4S (AI for Science) R&D: four-zone filenames, hash-bound registries, a single-source library, and a falsification ledger."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "AI4S Governance contributors" }]
+keywords = ["ai4s", "ai-for-science", "data-governance", "research-data-management", "provenance", "agents"]
+dependencies = ["PyYAML>=6.0"]
+
+[project.scripts]
+ai4s = "ai4s_governance.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+addopts = "-q"

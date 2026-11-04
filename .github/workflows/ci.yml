@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+
+      - name: Desensitization tripwire
+        run: python scripts/scan_sensitive.py --path .
+
+      - name: Humanizer tripwire
+        run: python scripts/humanize_check.py --path . --strict
+
+      - name: Local links
+        run: python scripts/check_links.py --path .
+
+      - name: Unit tests
+        run: python -m unittest discover -s tests -v
+
+      - name: Build demo lab
+        run: python examples/build_demo.py
+
+      - name: Registry verifies
+        run: ai4s registry verify --registry examples/demo/registry
+
+      - name: Delivery passes
+        run: |
+          ai4s check examples/demo/workspaces/owner-a/SR_DATA \
+            --registry examples/demo/registry \
+            --library examples/demo/library \
+            --strict
+
+      - name: Library verifies
+        run: ai4s ingest verify --library examples/demo/library
+
+      - name: Ledger validates
+        run: ai4s ledger check examples/ledger/deprecations.yaml
+
+      - name: Patrol runs
+        run: ai4s patrol --config examples/demo/lab.yaml --strict
