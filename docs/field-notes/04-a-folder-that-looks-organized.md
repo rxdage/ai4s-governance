@@ -1,6 +1,6 @@
-﻿# 一个看起来整理过的文件夹，其中 87% 的名字 agent 读不懂
+﻿# 一个看起来整理过的文件夹，agent 为什么读不懂
 
-**English title:** A folder that looks organized, where 87% of the names are unreadable to an agent
+**English title:** A folder that looks organized — and why an agent can't read it
 **English hook:** Humans navigate by folders and memory. Agents navigate by names. A folder can look tidy to you and still be dark to an agent.
 
 ---
@@ -27,7 +27,7 @@
 115 files, 15 parseable (13.0%), 5 duplicate name(s), 0 sidecar(s)
 ```
 
-其中 87% 的名字，agent 打不开，就不知道它是什么。
+这个合成样本里，87% 的名字 agent 打不开，就不知道它是什么。
 
 最常见的四类问题：
 

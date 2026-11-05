@@ -7,7 +7,7 @@
 
 | # | 中文 | English | 底稿 | 主要渠道 |
 |---|---|---|---|---|
-| 1 | 一个看起来整理过的文件夹，其中 87% 的名字 agent 读不懂 | A folder that looks organized, where 87% of the names are unreadable to an agent | [04](04-a-folder-that-looks-organized.md) | HN / 知乎 / 公众号 |
+| 1 | 一个看起来整理过的文件夹，agent 为什么读不懂 | A folder that looks organized — and why an agent can't read it | [04](04-a-folder-that-looks-organized.md) | HN / 知乎 / 公众号 |
 | 2 | 15 次修理，比最终架构更有用 | The changelog is the product | [01](01-the-changelog-is-the-product.md) | HN / 知乎 / LinkedIn |
 | 3 | 五个人多久才开始用？我们当时没量 | How fast do five scientists adopt governance? | [02](02-how-fast-do-five-scientists-adopt.md) | 知乎 / 公众号 / 播客 |
 | 4 | 为什么用最强模型改流程还是错，还贵 | The strongest model is not the best router | [03](03-the-strongest-model-is-not-the-router.md) | HN / 知乎 / AI4S CTO 群 |

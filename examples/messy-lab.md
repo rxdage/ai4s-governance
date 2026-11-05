@@ -33,7 +33,7 @@ EXT_MISSING      5
 ```
 
 The point is not the exact numbers. It is that a folder can look "organized" to a
-human and still be unreadable to an agent: 87% of these names cannot be parsed
+human and still be unreadable to an agent: 87% of these synthetic names cannot be parsed
 without opening the file.
 
 The generator does not modify anything outside its own folder. `ai4s audit` is
